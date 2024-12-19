@@ -1,0 +1,38 @@
+name: Deploy to Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          SA_PASSWORD: YourStrong!Passw0rd
+          ACCEPT_EULA: Y
+        ports:
+          - 1433:1433
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Build and run containers
+        run: |
+          docker-compose up --build -d
+      
+      - name: Wait for the database to be ready
+        run: |
+          sleep 10 # Дайте время базе данных запуститься
+      
+      - name: Test the API endpoint
+        run: |
+          curl http://localhost:5000/api || exit 1
+      
+      - name: Stop and remove containers
+        run: docker-compose down
