@@ -9,8 +9,19 @@ def get_db_connection():
     return conn
 
 @app.route('/api', methods=['GET'])
+
 def home():
     return jsonify({"message": "Hello, World!"})
+
+@app.route('/api/test', methods=['GET'])
+def get_test_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM test')
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(rows)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
